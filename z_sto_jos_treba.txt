@@ -1,0 +1,4 @@
+1. Napraviti da se audio moze playat pa da se tijekom pustanja prikazuju akordi
+2. Recording
+3. Format change (mp3)
+4. Da se moze playat prije uploada
