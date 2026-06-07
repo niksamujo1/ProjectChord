@@ -12,11 +12,13 @@ import sounddevice as sd
 from scipy.io.wavfile import write as wav_write
 from datetime import datetime
 import numpy as np
+from formatChange import convert_to_wav 
+
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "123456"
 app.config["UPLOAD_FOLDER"] = "audio"
-ALLOWED_EXTENSIONS = {"wav"}
+ALLOWED_EXTENSIONS = {"wav", "mp3"}
 
 SAMPLE_RATE = 44100
 recording_data = {"frames": [], "stream": None, "filepath": None}
@@ -25,6 +27,9 @@ recording_data = {"frames": [], "stream": None, "filepath": None}
 class UploadFileForm(FlaskForm):
     file = FileField("File")
     submit = SubmitField("Upload file")
+    
+    
+
 
 @app.route("/", methods=["GET", "POST"])
 @app.route("/home", methods=["GET", "POST"])
@@ -66,6 +71,12 @@ def home():
             filename = secure_filename(uploaded_file.filename)
             uploaded_file.save(filepath)
             uploaded_filename = filename
+            
+            # konvertiraj mp3 u wav ako treba
+            if filename.rsplit(".", 1)[1].lower() == "mp3":
+                filepath = convert_to_wav(filepath)
+                uploaded_filename = os.path.basename(filepath)  # koristi wav ime za player
+
             timeline = analyze_song(filepath)
             
             

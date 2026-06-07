@@ -1,16 +1,12 @@
 from pydub import AudioSegment
-import numpy as np
+import os
 
-audio = AudioSegment.from_wav("Mostovi.wav")
-
-audio = audio + 5
-
-
-audio = audio.fade_in(2000).fade_out(2000)
-
-audio.export("Mostovi_modified.mp3", format="mp3")
-
-audio2 = AudioSegment.from_mp3("Mostovi_modified.mp3")
-
-print("Done")
-
+def convert_to_wav(filepath):
+    ext = os.path.splitext(filepath)[1].lower()
+    if ext == ".wav":
+        return filepath  # već je wav, nema potrebe konvertirati
+    
+    audio = AudioSegment.from_file(filepath, format=ext.replace(".", ""))
+    wav_filepath = os.path.splitext(filepath)[0] + ".wav"
+    audio.export(wav_filepath, format="wav")
+    return wav_filepath
