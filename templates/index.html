@@ -12,8 +12,8 @@
       --bg:       #0e0e10;
       --surface:  #18181c;
       --border:   #2a2a30;
-      --accent:   #c8f04e;
-      --accent2:  #f0c84e;
+      --accent:   #e05555;
+      --accent2:  #f0a44e;
       --text:     #e8e8ec;
       --muted:    #72727a;
       --radius:   12px;
@@ -290,7 +290,7 @@
         <p class="file-name" id="fileName"></p>
       </div>
 
-      {{ form.submit(class="btn") }}
+      {{ form.submit(class="btn", value="Detect Chords") }}
     </form>
 
     <!-- divider -->
@@ -379,9 +379,7 @@
         <span class="time-val">{{ "%.2f"|format(item.end) }}s</span>
         <div style="display:flex; align-items:center; gap:12px;">
           <span class="chord-name">{{ item.chord }}</span>
-          <div class="bar-wrap" style="flex:1">
-            <div class="bar-fill" style="width:{{ pct }}%"></div>
-          </div>
+          <span style="font-size:0.72rem; color:var(--muted); margin-left:auto;">{{ "%.1f"|format(item.end - item.start) }}s</span>
         </div>
       </div>
       {% endif %}

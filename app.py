@@ -50,6 +50,7 @@ def home():
         if os.path.exists(filepath):
             uploaded_filename = recorded_filename
             timeline = analyze_song(filepath)
+            os.remove(filepath)
             return render_template("index.html", form=form,
                                    timeline=timeline,
                                    uploaded_filename=uploaded_filename)
@@ -78,6 +79,7 @@ def home():
                 uploaded_filename = os.path.basename(filepath)  # koristi wav ime za player
 
             timeline = analyze_song(filepath)
+            os.remove(filepath)
             
             
     return render_template(
