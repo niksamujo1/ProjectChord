@@ -60,26 +60,32 @@ def home():
     if form.validate_on_submit():
         uploaded_file = form.file.data
         if uploaded_file and uploaded_file.filename:
-            
             if not allowed_file(uploaded_file.filename):
                 return "Only WAV files are allowed"
-            
+
+            filename = secure_filename(uploaded_file.filename)
             filepath = os.path.join(
                 os.path.abspath(os.path.dirname(__file__)),
                 app.config["UPLOAD_FOLDER"],
-                secure_filename(uploaded_file.filename),
+                filename
             )
-            filename = secure_filename(uploaded_file.filename)
-            uploaded_file.save(filepath)
-            uploaded_filename = filename
-            
-            # konvertiraj mp3 u wav ako treba
-            if filename.rsplit(".", 1)[1].lower() == "mp3":
-                filepath = convert_to_wav(filepath)
-                uploaded_filename = os.path.basename(filepath)  # koristi wav ime za player
 
+            # izbriši stari fajl ako postoji (osim ako je isti fajl)
+            old_filename = request.form.get("current_filename")
+            if old_filename and old_filename != filename:
+                old_path = os.path.join(
+                    os.path.abspath(os.path.dirname(__file__)),
+                    app.config["UPLOAD_FOLDER"],
+                    secure_filename(old_filename)
+                )
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+
+            clear_audio_folder()
+            uploaded_file.save(filepath)
+            filepath = convert_to_wav(filepath)
+            uploaded_filename = os.path.basename(filepath)
             timeline = analyze_song(filepath)
-            os.remove(filepath)
             
             
     return render_template(
@@ -130,6 +136,7 @@ def record_stop():
         app.config["UPLOAD_FOLDER"],
         filename
     )
+    clear_audio_folder()
     wav_write(filepath, SAMPLE_RATE, audio)
     recording_data["filepath"] = filepath
     return jsonify({"status": "done", "filename": filename})
@@ -141,6 +148,13 @@ def record_stop():
 def allowed_file(filename):
     return "." in filename and \
            filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def clear_audio_folder():
+    folder = os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config["UPLOAD_FOLDER"])
+    for f in os.listdir(folder):
+        file_path = os.path.join(folder, f)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
 if __name__ == "__main__":
     app.run(debug=True)
