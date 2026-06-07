@@ -256,6 +256,10 @@
       font-size: 0.72rem;
       letter-spacing: 0.06em;
     }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -293,13 +297,42 @@
         <p class="file-name" id="fileName"></p>
       </div>
 
+      <!-- divider -->
+      <div style="display:flex; align-items:center; gap:12px; margin-top:24px;">
+        <div style="flex:1; height:1px; background:var(--border);"></div>
+        <span style="font-size:0.72rem; color:var(--muted); letter-spacing:0.1em;">OR RECORD</span>
+        <div style="flex:1; height:1px; background:var(--border);"></div>
+      </div>
+  
       {{ form.submit(class="btn") }}
     </form>
+    
+    <!-- recording section -->
+    <div style="margin-top:20px; text-align:center;">
+      <button id="recBtn" type="button" class="btn" style="background:var(--border); color:var(--text); width:100%;">
+        <span id="recBtnText">&#9679; Start Recording</span>
+      </button>
+      <p id="recStatus" style="margin-top:10px; font-size:0.75rem; color:var(--muted); min-height:1.2em;"></p>
+      <!-- live timer -->
+      <div id="recTimer" style="display:none; margin-top:4px;">
+        <span id="recTimerDot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#e05555; margin-right:6px; animation: blink 1s infinite;"></span>
+        <span id="recTimerVal" style="font-size:0.85rem; color:#e05555;">0:00</span>
+      </div>
+    </div>
 
-    <!-- jedan player, uvijek na istom mjestu -->
+    <!-- nakon recStatus paragrafa -->
+    <form id="recUploadForm" method="POST" style="display:none; margin-top:12px;">
+      {{ form.hidden_tag() }}
+      <input type="hidden" id="recFilenameInput" name="recorded_filename" value="">
+      <button type="submit" class="btn" style="background:var(--accent); color:#0e0e10;">
+        &#8679; Upload Recording & Detect Chords
+      </button>
+    </form>
+
+    <!-- one player for both upload preview and recording -->
     <div id="playerWrap" style="{% if not uploaded_filename %}display:none;{% endif %} margin-top:24px; padding-top:24px; border-top:1px solid var(--border);">
       <p class="drop-label" style="margin-bottom:10px;" id="playerLabel">
-        Preview
+        {% if uploaded_filename %}&#9834; {{ uploaded_filename }}{% endif %}
       </p>
       <audio id="audioPlayer" controls style="width:100%; border-radius:6px;">
         {% if uploaded_filename %}
@@ -378,6 +411,87 @@
       if (e.dataTransfer.files.length) {
         input.files = e.dataTransfer.files;
         loadPreview(input.files[0]);
+      }
+    });
+    // ── Recording ──────────────────────────────────────────────
+    const recBtn      = document.getElementById('recBtn');
+    const recBtnText  = document.getElementById('recBtnText');
+    const recStatus   = document.getElementById('recStatus');
+    const recTimer    = document.getElementById('recTimer');
+    const recTimerVal = document.getElementById('recTimerVal');
+
+    let isRecording = false;
+    let timerInterval = null;
+    let seconds = 0;
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const ss = String(s % 60).padStart(2, '0');
+      return `${m}:${ss}`;
+    }
+
+    recBtn.addEventListener('click', async () => {
+      if (!isRecording) {
+        // START
+        recBtn.disabled = true;
+        recStatus.textContent = 'Starting...';
+        try {
+          const res = await fetch('/record/start', { method: 'POST' });
+          const data = await res.json();
+          if (data.status === 'recording') {
+            isRecording = true;
+            recBtnText.textContent = '⏹ Stop Recording';
+            recBtn.style.background = '#e05555';
+            recBtn.style.color = '#fff';
+            recStatus.textContent = '';
+            recTimer.style.display = 'block';
+            seconds = 0;
+            recTimerVal.textContent = formatTime(seconds);
+            timerInterval = setInterval(() => {
+              seconds++;
+              recTimerVal.textContent = formatTime(seconds);
+            }, 1000);
+          }
+        } catch(e) {
+          recStatus.textContent = 'Error starting recording.';
+        }
+        recBtn.disabled = false;
+      } else {
+        // STOP
+        recBtn.disabled = true;
+        recStatus.textContent = 'Saving...';
+        clearInterval(timerInterval);
+        recTimer.style.display = 'none';
+        try {
+          const res = await fetch('/record/stop', { method: 'POST' });
+          const data = await res.json();
+          if (data.filename) {
+            isRecording = false;
+            recBtnText.textContent = '● Start Recording';
+            recBtn.style.background = 'var(--border)';
+            recBtn.style.color = 'var(--text)';
+            recStatus.textContent = `Saved: ${data.filename}`;
+
+            // load into player
+            playerLabel.textContent = '♪ ' + data.filename;
+            audioPlayer.src = `/audio/${data.filename}`;
+            audioPlayer.load();
+            playerWrap.style.display = 'block';
+
+            // set hidden file input so form can submit it
+            label.textContent = data.filename;
+
+            // store filename for form submission
+            recBtn.dataset.lastFile = data.filename;
+
+            // popuni i prikaži recUploadForm
+            document.getElementById('recFilenameInput').value = data.filename;
+            document.getElementById('recUploadForm').style.display = 'block';
+          }
+        } catch(e) {
+          recStatus.textContent = 'Error saving recording.';
+        }
+        recBtn.disabled = false;
       }
     });
   </script>
