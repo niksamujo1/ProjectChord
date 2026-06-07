@@ -260,7 +260,18 @@
 </head>
 <body>
 
-  
+  <header>
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#0e0e10" stroke-width="2.5" stroke-linecap="round">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+        </svg>
+      </div>
+    </div>
+    <h1>Chord <em>Detector</em></h1>
+    <p class="subtitle">WAV audio analysis</p>
+  </header>
 
   <div class="card">
     <form method="POST" enctype="multipart/form-data">
@@ -277,13 +288,25 @@
         </div>
         <p class="drop-label">
           <strong>Choose a WAV file</strong><br>
-          
+          or drag and drop it here
         </p>
         <p class="file-name" id="fileName"></p>
       </div>
 
       {{ form.submit(class="btn") }}
     </form>
+
+    <!-- jedan player, uvijek na istom mjestu -->
+    <div id="playerWrap" style="{% if not uploaded_filename %}display:none;{% endif %} margin-top:24px; padding-top:24px; border-top:1px solid var(--border);">
+      <p class="drop-label" style="margin-bottom:10px;" id="playerLabel">
+        Preview
+      </p>
+      <audio id="audioPlayer" controls style="width:100%; border-radius:6px;">
+        {% if uploaded_filename %}
+        <source src="{{ url_for('serve_audio', filename=uploaded_filename) }}" type="audio/wav">
+        {% endif %}
+      </audio>
+    </div>
   </div>
 
   {% if timeline %}
@@ -315,7 +338,9 @@
         <span class="time-val">{{ "%.2f"|format(item.end) }}s</span>
         <div style="display:flex; align-items:center; gap:12px;">
           <span class="chord-name">{{ item.chord }}</span>
-          
+          <div class="bar-wrap" style="flex:1">
+            <div class="bar-fill" style="width:{{ pct }}%"></div>
+          </div>
         </div>
       </div>
       {% endif %}
@@ -327,13 +352,23 @@
   <footer>chord detector &mdash; wav analysis tool</footer>
 
   <script>
-    const input = document.getElementById('fileInput');
-    const label = document.getElementById('fileName');
-    const zone  = document.getElementById('dropZone');
+    const input       = document.getElementById('fileInput');
+    const label       = document.getElementById('fileName');
+    const zone        = document.getElementById('dropZone');
+    const playerWrap  = document.getElementById('playerWrap');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const playerLabel = document.getElementById('playerLabel');
 
-    input.addEventListener('change', () => {
-      label.textContent = input.files[0]?.name ?? '';
-    });
+    function loadPreview(file) {
+      if (!file) return;
+      label.textContent = file.name;
+      playerLabel.textContent = '♪ ' + file.name;
+      audioPlayer.src = URL.createObjectURL(file);
+      audioPlayer.load();
+      playerWrap.style.display = 'block';
+    }
+
+    input.addEventListener('change', () => loadPreview(input.files[0]));
 
     zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
     zone.addEventListener('dragleave', () => zone.classList.remove('over'));
@@ -342,7 +377,7 @@
       zone.classList.remove('over');
       if (e.dataTransfer.files.length) {
         input.files = e.dataTransfer.files;
-        label.textContent = input.files[0].name;
+        loadPreview(input.files[0]);
       }
     });
   </script>

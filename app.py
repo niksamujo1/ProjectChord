@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, send_from_directory
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import SubmitField
@@ -22,6 +22,7 @@ class UploadFileForm(FlaskForm):
 def home():
     timeline = None
     form = UploadFileForm()
+    uploaded_filename = None
     if form.validate_on_submit():
         uploaded_file = form.file.data
         if uploaded_file and uploaded_file.filename:
@@ -34,20 +35,28 @@ def home():
                 app.config["UPLOAD_FOLDER"],
                 secure_filename(uploaded_file.filename),
             )
-            
+            filename = secure_filename(uploaded_file.filename)
             uploaded_file.save(filepath)
-            
+            uploaded_filename = filename
             timeline = analyze_song(filepath)
             
             
     return render_template(
         "index.html", 
         form=form,
-        timeline=timeline
+        timeline=timeline,
+        uploaded_filename=uploaded_filename 
     )
     
+
+@app.route("/audio/<filename>")
+def serve_audio(filename):
+    return send_from_directory(
+        os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config["UPLOAD_FOLDER"]),
+        filename
+    )
     
-    
+
 # -------------------------- HELPER -------------------------------
 
 def allowed_file(filename):
