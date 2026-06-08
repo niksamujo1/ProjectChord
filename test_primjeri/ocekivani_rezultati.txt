@@ -1,0 +1,35 @@
+1_test_note:
+    A4.wav - A_Dur
+    C5.wav - C_Dur
+    D1.wav - D_Dur
+    E3.wav - E_Dur
+    F7.wav - F_Dur
+
+2_test_akord:
+    A_Dur.wav - A_Dur
+    B_Mol.wav - B_Mol
+    C#_Mol.wav - C#_Mol
+    E_Dru.wav - E_Dru
+    F#_Dur.wav - F#_Dur
+    G_Mol.wav - G_Mol
+
+3_test_akordi:
+    C_F_Em_Dm.wav - C_Dur > F_Dur > E_Mol > D_Mol
+    Dm-Em-Am.wav - D_Mol > E_Mol > A_Mol
+    Em_G_Am_Bm_C.wav - E_Mol > G_Dur > A_Mol > B_Mol > C_Dur
+    G_Bm_Am_C.wav - G_Dur > B_Mol > A_Mol > C_Dur
+    G_F_Dm_C.wav - G_Dur > F_Dur > D_Mol > C_Dur
+
+4_test_gitara:
+    A#m_Bm_G_G#_Dm_D#m.wav - A#_Mol > B_Mol > G_Dur > G#_Dur > D_Mol > D#_Mol
+    D_A_Cm_Gm.wav - D_Dur > A_Dur > C_Mol > G_Mol
+    E_Am.wav - E_Dur > A_Mol
+    F_G_A.wav - F_Dur > G_Dur > A_Dur
+    Gm.wav - G_Mol
+
+5_test_pjesma
+    ABC Song - C_Dur > G_Dur > A_Dur > G_Dur > F_Dur > E_Dur > D_Dur > C_Dur > G_Dur > F_Dru > E_Dur > D_Dur > G_Dur > F_Dru > E_Dur > D_Dur > C_Dur > G_Dur > A_Dur > G_Dur > F_Dur > E_Dur > D_Dur > C_Dur
+    CountryRoad.wav - A_Dur > F#_Mol > E_Dru > D_Dur > A_Dur > F#_Mol > E_Dru > D_Dur > A_Dur > E_Dur > F#_Mol > D_Dur > A_Dur > E_Dur > D_Dur > A_Dur
+    Greensleevs.wav - C_Dur > G_Dur > A_Mol > E_Dur
+    Perfect.wav - G#_Dur > F_Mol > C#_Dur > D#_Dur > G#_Dur > F_Mol > C#_Dur > D#_Dur > F_Mol > C#_Dur > G#_Dur > D#_Dru > F_Mol > C#_Dur > G#_Dur > D#_Dru > G#_Dur
+    Zombie.wav - E_Mol > C_Dur > G_Dur > D_Dur > E_Mol > C_Dur > G_Dur > D_Dur
