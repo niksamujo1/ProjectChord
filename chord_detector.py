@@ -178,7 +178,6 @@ def create_timeline(chords, hop_size, sample_rate):
 
     return timeline
 
-
 def analyze_song(filepath):
     sample_rate, signal = load_audio(filepath)
     templates = create_chord_templates()
@@ -207,7 +206,9 @@ def analyze_song(filepath):
     smoothed_chords = smooth_chords(detected_chords)
     filtered_chords = remove_short_chords(smoothed_chords, min_chord_length)
 
-    return create_timeline(filtered_chords, hop_size, sample_rate)
+    timeline = create_timeline(filtered_chords, hop_size, sample_rate)
+    return timeline
+
 
 
 if __name__ == "__main__":

@@ -5,7 +5,9 @@ const playerWrap  = document.getElementById('playerWrap');
 const audioPlayer = document.getElementById('audioPlayer');
 const playerLabel = document.getElementById('playerLabel');
 
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
+let transposeSteps = 0;
 
 function hideResults() {
     const results = document.querySelector('.results');
@@ -196,3 +198,54 @@ if (audioPlayer) {
     if (liveChord) liveChord.textContent = chord || '—';
     });
 }
+
+// transpose 
+
+function transposeChord(chord, steps) {
+  if (!chord || chord === "None") return chord;
+
+  const parts = chord.split("_");
+  const root = parts[0];
+  const type = parts[1];
+
+  const index = NOTE_NAMES.indexOf(root);
+  if (index === -1) return chord;
+
+  const newIndex = (index + steps + 12) % 12;
+  return `${NOTE_NAMES[newIndex]}_${type}`;
+}
+
+function updateDisplayedChords() {
+  const rows = document.querySelectorAll(".chord-row");
+
+  rows.forEach((row, index) => {
+    const chordSpan = row.querySelector(".chord-name");
+    const originalChord = chordTimeline[index].chord;
+
+    chordSpan.textContent = transposeChord(originalChord, transposeSteps);
+  });
+
+  const liveChord = document.getElementById("liveChord");
+  if (liveChord && liveChord.textContent !== "—") {
+    liveChord.textContent = transposeChord(liveChord.dataset.originalChord, transposeSteps);
+  }
+
+  document.getElementById("transposeValue").textContent =
+    transposeSteps > 0 ? `+${transposeSteps}` : transposeSteps;
+}
+
+document.getElementById("transposeUp")?.addEventListener("click", () => {
+    if(transposeSteps < 12){
+        transposeSteps += 1;
+        updateDisplayedChords();
+
+    }
+});
+
+document.getElementById("transposeDown")?.addEventListener("click", () => {
+    if(transposeSteps > -12){
+        transposeSteps -= 1;
+        updateDisplayedChords();
+
+    }
+});

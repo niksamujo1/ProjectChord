@@ -83,6 +83,14 @@
     <div class="results-header">
       <h2>Detected Chords</h2>
       <span class="badge">{{ timeline | length }} chords</span>
+
+    <!-- transpose button -->
+      <div class="transpose-control">
+        <button id="transposeDown" type="button" class="transpose-btn">-</button>
+        <span id="transposeValue">0</span>
+        <button id="transposeUp" type="button" class="transpose-btn">+</button>
+      </div>
+
       <button id="toggleMode" type="button" style="
         margin-left:auto; background:none; border:1px solid var(--border);
         color:var(--muted); border-radius:20px; padding:3px 14px;

@@ -252,3 +252,40 @@ footer {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0; }
 }
+
+.transpose-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+}
+
+.transpose-btn {
+  width: 26px;
+  height: 26px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.transpose-btn:hover {
+  border-color: var(--accent);
+  background: rgba(224, 85, 85, 0.08);
+}
+
+#transposeValue {
+  width: 32px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text);
+  flex-shrink: 0;
+}
