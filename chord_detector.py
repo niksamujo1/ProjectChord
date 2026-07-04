@@ -9,10 +9,11 @@ import scipy.io.wavfile as wav
 NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F",
               "F#", "G", "G#", "A", "A#", "B"]
 
-WINDOW_DURATION = 0.15        # 150 ms
+WINDOW_DURATION = 0.25       # 150 ms
 OVERLAP = 0.5                 # 50 %
-SILENCE_THRESHOLD_RATIO = 0.03
-MIN_CHORD_DURATION = 0.5      # seconds
+SILENCE_THRESHOLD_RATIO = 0.03 # 0.02
+MIN_CHORD_DURATION = 0.5      # 0.5 s
+WINDOW_SMOOTHING_RADIUS = 2   # 2
 
 
 def load_audio(filepath):
@@ -203,7 +204,7 @@ def analyze_song(filepath):
         chord = detect_chord(chroma, templates)
         detected_chords.append(chord)
 
-    smoothed_chords = smooth_chords(detected_chords)
+    smoothed_chords = smooth_chords(detected_chords, WINDOW_SMOOTHING_RADIUS)
     filtered_chords = remove_short_chords(smoothed_chords, min_chord_length)
 
     timeline = create_timeline(filtered_chords, hop_size, sample_rate)

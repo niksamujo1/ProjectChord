@@ -39,9 +39,10 @@ def home():
     uploaded_filename = None
     
     
-    # Snimljeni fajl (bez file uploada)
+    # snimljeni file (bez file uploada)
     recorded_filename = request.form.get("recorded_filename")
     if recorded_filename and request.method == "POST":
+        # spremi u folder
         filepath = os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
             app.config["UPLOAD_FOLDER"],
@@ -61,7 +62,7 @@ def home():
         uploaded_file = form.file.data
         if uploaded_file and uploaded_file.filename:
             if not allowed_file(uploaded_file.filename):
-                return "Only WAV files are allowed"
+                return "Only WAV and MP3 files are allowed"
 
             filename = secure_filename(uploaded_file.filename)
             filepath = os.path.join(

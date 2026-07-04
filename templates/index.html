@@ -84,7 +84,7 @@
       <h2>Detected Chords</h2>
       <span class="badge">{{ timeline | length }} chords</span>
 
-    <!-- transpose button -->
+      <!-- transpose button -->
       <div class="transpose-control">
         <button id="transposeDown" type="button" class="transpose-btn">-</button>
         <span id="transposeValue">0</span>
@@ -123,22 +123,22 @@
       <span>Chord</span>
     </div>
 
-    <div class="timeline">
-      {% for item in timeline %}
-      {% if item.chord and item.chord | string | lower != 'none' %}
-      {% set dur = item.end - item.start %}
-      {% set pct = (dur / max_dur.v * 100) | round(1) %}
-      <div class="chord-row" style="animation-delay: {{ loop.index0 * 0.03 }}s">
-        <span class="time-val">{{ "%.2f"|format(item.start) }}s</span>
-        <span class="time-val">{{ "%.2f"|format(item.end) }}s</span>
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span class="chord-name">{{ item.chord }}</span>
-          <span style="font-size:0.72rem; color:var(--muted); margin-left:auto;">{{ "%.1f"|format(item.end - item.start) }}s</span>
+      <div class="timeline">
+        {% for item in timeline %}
+        {% if item.chord and item.chord | string | lower != 'none' %}
+        {% set dur = item.end - item.start %}
+        {% set pct = (dur / max_dur.v * 100) | round(1) %}
+        <div class="chord-row" style="animation-delay: {{ loop.index0 * 0.03 }}s">
+          <span class="time-val">{{ "%.2f"|format(item.start) }}s</span>
+          <span class="time-val">{{ "%.2f"|format(item.end) }}s</span>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="chord-name">{{ item.chord }}</span>
+            <span style="font-size:0.72rem; color:var(--muted); margin-left:auto;">{{ "%.1f"|format(item.end - item.start) }}s</span>
+          </div>
         </div>
+        {% endif %}
+        {% endfor %}
       </div>
-      {% endif %}
-      {% endfor %}
-    </div>
     </div> <!-- end tableBox -->
   </div>
   {% endif %}
