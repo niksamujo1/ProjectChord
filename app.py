@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request, send_from_directory, url_for
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import SubmitField
@@ -7,18 +7,18 @@ from werkzeug.utils import secure_filename
 import os
 from wtforms.validators import InputRequired
 from chord_detector import analyze_song
-import threading
-import sounddevice as sd
-from scipy.io.wavfile import write as wav_write
-from datetime import datetime
-import numpy as np
+# import threading
+# import sounddevice as sd
+# from scipy.io.wavfile import write as wav_write
+# from datetime import datetime
+# import numpy as np
 from formatChange import convert_to_wav 
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "123456"
 app.config["UPLOAD_FOLDER"] = "audio"
-ALLOWED_EXTENSIONS = {"wav", "mp3"}
+ALLOWED_EXTENSIONS = {"wav", "mp3", "webm", "ogg"}
 
 SAMPLE_RATE = 44100
 recording_data = {"frames": [], "stream": None, "filepath": None}
@@ -51,10 +51,13 @@ def home():
         if os.path.exists(filepath):
             uploaded_filename = recorded_filename
             timeline = analyze_song(filepath)
-            os.remove(filepath)
-            return render_template("index.html", form=form,
-                                   timeline=timeline,
-                                   uploaded_filename=uploaded_filename)
+            
+            return render_template(
+                "index.html", 
+                form=form,
+                timeline=timeline,
+                uploaded_filename=uploaded_filename
+            )
 
 
 
@@ -108,42 +111,73 @@ def serve_audio(filename):
     
 # ------------------------- RECORDING --------------------------------
 
-@app.route("/record/start", methods=["POST"])
-def record_start():
-    recording_data["frames"] = []
+# @app.route("/record/start", methods=["POST"])
+# def record_start():
+#     recording_data["frames"] = []
 
-    def callback(indata, frames, time, status):
-        recording_data["frames"].append(indata.copy())
+#     def callback(indata, frames, time, status):
+#         recording_data["frames"].append(indata.copy())
 
-    stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, callback=callback)
-    stream.start()
-    recording_data["stream"] = stream
-    return jsonify({"status": "recording"})
+#     stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, callback=callback)
+#     stream.start()
+#     recording_data["stream"] = stream
+#     return jsonify({"status": "recording"})
 
-@app.route("/record/stop", methods=["POST"])
-def record_stop():
-    stream = recording_data.get("stream")
-    if not stream:
-        return jsonify({"error": "No active recording"}), 400
+# @app.route("/record/stop", methods=["POST"])
+# def record_stop():
+#     stream = recording_data.get("stream")
+#     if not stream:
+#         return jsonify({"error": "No active recording"}), 400
 
-    stream.stop()
-    stream.close()
-    recording_data["stream"] = None
+#     stream.stop()
+#     stream.close()
+#     recording_data["stream"] = None
 
-    audio = np.concatenate(recording_data["frames"], axis=0)
-    filename = datetime.now().strftime("recording_%Y%m%d_%H%M%S.wav")
-    filepath = os.path.join(
+#     audio = np.concatenate(recording_data["frames"], axis=0)
+#     filename = datetime.now().strftime("recording_%Y%m%d_%H%M%S.wav")
+#     filepath = os.path.join(
+#         os.path.abspath(os.path.dirname(__file__)),
+#         app.config["UPLOAD_FOLDER"],
+#         filename
+#     )
+#     clear_audio_folder()
+#     wav_write(filepath, SAMPLE_RATE, audio)
+#     recording_data["filepath"] = filepath
+#     return jsonify({"status": "done", "filename": filename})
+
+@app.route("/record/upload", methods=["POST"])
+def record_upload():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    uploaded_file = request.files["file"]
+
+    if uploaded_file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+
+    filename = secure_filename(uploaded_file.filename)
+
+    if not allowed_file(filename):
+        return jsonify({"error": "Unsupported file type"}), 400
+
+    folder = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
-        app.config["UPLOAD_FOLDER"],
-        filename
+        app.config["UPLOAD_FOLDER"]
     )
+
     clear_audio_folder()
-    wav_write(filepath, SAMPLE_RATE, audio)
-    recording_data["filepath"] = filepath
-    return jsonify({"status": "done", "filename": filename})
 
+    filepath = os.path.join(folder, filename)
+    uploaded_file.save(filepath)
 
+    wav_path = convert_to_wav(filepath)
+    wav_filename = os.path.basename(wav_path)
 
+    return jsonify({
+        "status": "saved",
+        "filename": wav_filename,
+        "audio_url": url_for("serve_audio", filename=wav_filename)
+    })
 # -------------------------- HELPER -------------------------------
 
 def allowed_file(filename):

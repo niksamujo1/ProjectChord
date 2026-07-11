@@ -3,5 +3,5 @@ flask-wtf
 werkzeug
 numpy
 scipy
-sounddevice
 pydub
+gunicorn

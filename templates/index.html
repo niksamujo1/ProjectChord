@@ -18,6 +18,7 @@
   <div class="card">
     <form method="POST" enctype="multipart/form-data">
       <input type="hidden" name="current_filename" value="{{ uploaded_filename or '' }}">
+      <input type="hidden" name="recorded_filename" id="recordedFilename">
       {{ form.hidden_tag() }}
 
       <div class="drop-zone" id="dropZone">
