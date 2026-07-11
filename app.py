@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, jsonify, request, send_from_directory, url_for
+from flask import Flask, render_template, jsonify, request, send_from_directory, url_for, redirect
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import SubmitField
@@ -31,7 +31,9 @@ class UploadFileForm(FlaskForm):
     
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
+def index():
+    return redirect(url_for("home"))
 @app.route("/home", methods=["GET", "POST"])
 def home():
     timeline = None
