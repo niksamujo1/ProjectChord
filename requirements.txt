@@ -1,6 +1,7 @@
-flask
-flask-wtf
-werkzeug
+Flask
+Flask-WTF
+WTForms
+Werkzeug
 numpy
 scipy
 pydub
