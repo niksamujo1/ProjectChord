@@ -63,7 +63,15 @@ if (recBtn) {
 }
 
 async function startBrowserRecording() {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+            channelCount: 1,
+            sampleRate: 44100
+        }
+    });
 
   audioChunks = [];
   mediaRecorder = new MediaRecorder(stream);
@@ -125,6 +133,8 @@ function stopBrowserRecording() {
   if (mediaRecorder && isRecording) {
     mediaRecorder.stop();
     isRecording = false;
+
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
 
     recBtnText.textContent = "● Start Recording";
     recStatus.textContent = "Processing...";
