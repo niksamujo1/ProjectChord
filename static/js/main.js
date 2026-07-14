@@ -63,21 +63,24 @@ if (recBtn) {
 }
 
 async function startBrowserRecording() {
-  const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-            channelCount: 1,
-            sampleRate: 44100
-        }
-    });
-
+  // potpuno resetiranje stare snimke
   audioChunks = [];
+  mediaRecorder = null;
+
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation: false,
+      noiseSuppression: false,
+      autoGainControl: false,
+      channelCount: 1,
+      sampleRate: 44100
+    }
+  });
+
   mediaRecorder = new MediaRecorder(stream);
 
   mediaRecorder.ondataavailable = (event) => {
-    if (event.data.size > 0) {
+    if (event.data && event.data.size > 0) {
       audioChunks.push(event.data);
     }
   };
@@ -85,42 +88,44 @@ async function startBrowserRecording() {
   mediaRecorder.onstop = async () => {
     const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
 
+   
+    const recordingName = `recording_${Date.now()}.webm`;
+
     const formData = new FormData();
-    formData.append("file", audioBlob, "recording.webm");
+    formData.append("file", audioBlob, recordingName);
 
     recStatus.textContent = "Saving recording...";
 
     const response = await fetch("/record/upload", {
-        method: "POST",
-        body: formData
+      method: "POST",
+      body: formData
     });
 
     const data = await response.json();
 
     if (data.error) {
-        recStatus.textContent = data.error;
-        return;
+      recStatus.textContent = data.error;
+      return;
     }
 
     const recordedFilenameInput = document.getElementById("recordedFilename");
     recordedFilenameInput.value = data.filename;
 
-    const playerWrap = document.getElementById("playerWrap");
-    const audioPlayer = document.getElementById("audioPlayer");
-    const playerLabel = document.getElementById("playerLabel");
+    input.value = "";
+    label.textContent = "";
 
     playerWrap.style.display = "block";
     playerLabel.textContent = "♫ " + data.filename;
 
-    audioPlayer.innerHTML = "";
-    const source = document.createElement("source");
-    source.src = data.audio_url;
-    source.type = "audio/wav";
-    audioPlayer.appendChild(source);
+    
+    audioPlayer.src = data.audio_url + "?t=" + Date.now();
     audioPlayer.load();
 
-    recStatus.textContent = "";
-    };
+    hideResults();
+
+    
+    audioChunks = [];
+  };
 
   mediaRecorder.start();
   isRecording = true;
@@ -131,10 +136,13 @@ async function startBrowserRecording() {
 
 function stopBrowserRecording() {
   if (mediaRecorder && isRecording) {
-    mediaRecorder.stop();
     isRecording = false;
 
-    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    mediaRecorder.stop();
+
+    mediaRecorder.stream.getTracks().forEach(track => {
+      track.stop();
+    });
 
     recBtnText.textContent = "● Start Recording";
     recStatus.textContent = "Processing...";

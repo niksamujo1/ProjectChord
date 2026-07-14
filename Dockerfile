@@ -11,4 +11,5 @@ COPY . .
 
 RUN mkdir -p audio
 
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000"]
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--timeout", "180", "--access-logfile", "-", "--error-logfile", "-"]
+
