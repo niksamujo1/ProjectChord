@@ -18,3 +18,7 @@ http://127.0.0.1:5000
 - Ili snimi audio direktno u aplikaciji
 - Klikni "Detect Chords"
 - Rezultati se prikazuju u tabličnom ili live modu
+
+### Update - demo verzija
+
+https://projectchord.onrender.com/
